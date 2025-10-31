@@ -1,8 +1,11 @@
 import React from "react";
 import { View, Text, ScrollView, Image, Dimensions, ToastAndroid, BackHandler, TouchableOpacity } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { requestNotificationPermission, checkAndNotifyDueTasks } from '@/utils/notification';
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
+import { useTaskNotificationChecker } from './notify';
+import { useSelector } from 'react-redux';
 import { useTheme } from "@/hooks";
+import { getUsername } from '@/api/tasksApi';
 import { capitalizeName } from '@/utils/functions.js'
 import { MarketPlace } from "./card";
 import Banner from "@/utils/ui/Banner";
@@ -11,6 +14,8 @@ import Footer from "@/screens/navigator/userTab";
 export default function Index() {
   const { Colors, Fonts, Gutters, Layout, Images, FontSize } = useTheme();
   const { width, height } = Dimensions.get('window');
+  const { tasks } = useSelector((state) => state.tasks);
+  console.log("tasks:", tasks)
   const navigation = useNavigation();
   const route = useRoute();
   const [username, setUsername] = React.useState('');
@@ -20,6 +25,8 @@ export default function Index() {
     { img: Images.screens.bulk, title: '5 points', subtitle: 'Fuel\nsurcharge\nwaiver', textColor: Colors.white },
     { img: Images.screens.bag, title: '2X points', subtitle: 'on travel &\nhotel\nbookings', textColor: Colors.white },
   ];
+
+  useTaskNotificationChecker(tasks);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -54,8 +61,8 @@ export default function Index() {
 
   React.useEffect(() => {
     const fetchUsername = async () => {
-      const user = await AsyncStorage.getItem('username');
-      setUsername(user || 'Guest');
+      const username = await getUsername();
+      setUsername(username || 'Guest');
     };
     fetchUsername();
   }, []);

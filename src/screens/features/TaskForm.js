@@ -1,19 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { View, TextInput, TouchableOpacity, Text, FlatList } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { auth, firestore } from "@/api/firebase";
+import { firestore } from "@/api/firebase";
 import { addTask } from "@/utils/store/taskSlice";
 
 const TaskForm = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [dueDate, setDueDate] = useState(null);
-  const [showPicker, setShowPicker] = useState(false);
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    dueDate: null,
+    selectedUser: null,
+  });
+
+  const [ui, setUi] = useState({
+    showDatePicker: false,
+    showTimePicker: false,
+    search: "",
+  });
+
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [search, setSearch] = useState("");
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
@@ -22,56 +29,83 @@ const TaskForm = () => {
     const unsubscribe = firestore()
       .collection("users")
       .onSnapshot((snap) => {
-        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        setUsers(list);
+        setUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
       });
     return unsubscribe;
   }, []);
 
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) =>
+      u.username?.toLowerCase().includes(ui.search.toLowerCase())
+    );
+  }, [users, ui.search]);
+
+  const handleChange = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleUiChange = (key, value) => {
+    setUi((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const onDateChange = (event, selectedDate) => {
+    handleUiChange("showDatePicker", false);
+    if (selectedDate) {
+      handleChange("dueDate", new Date(selectedDate));
+      handleUiChange("showTimePicker", true);
+    }
+  };
+
+  const onTimeChange = (event, selectedTime) => {
+    handleUiChange("showTimePicker", false);
+    if (selectedTime) {
+      const newDate = new Date(form.dueDate || new Date());
+      newDate.setHours(selectedTime.getHours());
+      newDate.setMinutes(selectedTime.getMinutes());
+      handleChange("dueDate", newDate);
+    }
+  };
+
   const submitHandler = () => {
-    if (!title.trim()) return alert("Enter title");
+    const { title, description, dueDate, selectedUser } = form;
+    if (!title.trim()) return alert("Enter task title");
     if (!selectedUser) return alert("Select a user to assign");
+    if (!dueDate) return alert("Select a due date & time");
 
     const newTask = {
       title,
       description,
-      userId: selectedUser.id, 
+      userId: selectedUser.id,
       userName: selectedUser.username,
-      dueDate: dueDate ? dueDate.toISOString() : null,
+      dueDate: dueDate.toISOString(),
+      createdAt: new Date().toISOString(),
     };
 
     dispatch(addTask(newTask));
     navigation.goBack();
   };
 
-  const filteredUsers = users.filter((u) =>
-    u.username.toLowerCase().includes(search.toLowerCase())
-  );
-
-//   console.log("selectedUser.username:",selectedUser.username)
-
   return (
     <View style={{ flex: 1, padding: 20 }}>
       <TextInput
         placeholder="Task Title"
-        value={title}
-        onChangeText={setTitle}
+        value={form.title}
+        onChangeText={(text) => handleChange("title", text)}
         style={{ borderBottomWidth: 1, marginBottom: 16, padding: 8 }}
       />
 
       <TextInput
         placeholder="Task Description"
-        value={description}
-        onChangeText={setDescription}
+        value={form.description}
+        onChangeText={(text) => handleChange("description", text)}
         multiline
         style={{ borderBottomWidth: 1, marginBottom: 16, padding: 8 }}
       />
 
-      {/* ✅ Assign to user */}
       <TextInput
         placeholder="Search User"
-        value={search}
-        onChangeText={setSearch}
+        value={ui.search}
+        onChangeText={(text) => handleUiChange("search", text)}
         style={{ borderBottomWidth: 1, marginBottom: 8, padding: 8 }}
       />
 
@@ -83,11 +117,12 @@ const TaskForm = () => {
             <TouchableOpacity
               style={{
                 padding: 8,
-                backgroundColor: selectedUser?.id === item.id ? "#FEC230" : "#eee",
+                backgroundColor:
+                  form.selectedUser?.id === item.id ? "#FEC230" : "#eee",
                 borderRadius: 6,
                 marginBottom: 4,
               }}
-              onPress={() => setSelectedUser(item)}
+              onPress={() => handleChange("selectedUser", item)}
             >
               <Text>{item.username}</Text>
             </TouchableOpacity>
@@ -95,19 +130,35 @@ const TaskForm = () => {
         />
       )}
 
-      <TouchableOpacity onPress={() => setShowPicker(true)} style={{ marginVertical: 16 }}>
-        <Text>{dueDate ? `📅 ${dueDate.toDateString()}` : "Select Due Date"}</Text>
+      <TouchableOpacity
+        onPress={() => handleUiChange("showDatePicker", true)}
+        style={{ marginVertical: 16 }}
+      >
+        <Text>
+          {form.dueDate
+            ? `📅 ${form.dueDate.toLocaleDateString()} 🕒 ${form.dueDate.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`
+            : "Select Due Date & Time"}
+        </Text>
       </TouchableOpacity>
 
-      {showPicker && (
+      {ui.showDatePicker && (
         <DateTimePicker
-          value={dueDate || new Date()}
+          value={form.dueDate || new Date()}
           mode="date"
           display="default"
-          onChange={(event, date) => {
-            setShowPicker(false);
-            if (date) setDueDate(date);
-          }}
+          onChange={onDateChange}
+        />
+      )}
+
+      {ui.showTimePicker && (
+        <DateTimePicker
+          value={form.dueDate || new Date()}
+          mode="time"
+          display="default"
+          onChange={onTimeChange}
         />
       )}
 
