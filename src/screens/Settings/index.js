@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Pressable, Text, StyleSheet } from "react-native";
 import LinearGradient from 'react-native-linear-gradient';
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@/hooks";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from "@react-navigation/native";
 import CustomConfirmModal from "./logout";
 import Header from "@/utils/ui/Header";
+import EncryptedStorage from "react-native-encrypted-storage";
+import auth from "@react-native-firebase/auth";
+import { showToast } from "@/utils/ui/Toast";
 
 export default function Settings() {
   const { Colors, Fonts, Gutters, Layout } = useTheme();
@@ -15,14 +17,25 @@ export default function Settings() {
   const [isAlertVisible, setIsAlertVisible] = useState(false);
 
   const handleLogout = async () => {
-    await AsyncStorage.clear();
-    setIsAlertVisible(false);
-    navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+    try {
+      await auth().signOut();
+      await EncryptedStorage.removeItem("user_session");
+
+      showToast("You logged out successfully!");
+
+      navigation.reset({ index: 0, routes: [{ name: "Login" }]});
+
+    } catch (error) {
+      console.log("Logout Error:", error);
+      showToast("Failed to logout. Please try again.");
+    } finally {
+      setIsAlertVisible(false);
+    }
   };
 
   return (
     <View style={[Layout.fill]}>
-      <Header headerName="Settings"/>
+      <Header headerName="Settings" />
       <Pressable
         style={[Layout.rowHCenter, Gutters.defHPadding, Gutters.defBPadding, Gutters.defTPadding, {
           borderBottomWidth: 0.7, borderStyle: 'dotted', borderColor: '#C5D2F8',

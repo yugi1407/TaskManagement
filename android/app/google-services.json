@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "12015944696",
+    "project_id": "irishtask",
+    "storage_bucket": "irishtask.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12015944696:android:1f45736d158add8a2acc0d",
+        "android_client_info": {
+          "package_name": "com.irishtask"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB08M4lcz7wW87EqHTCOiMN-TvCunrZLjw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

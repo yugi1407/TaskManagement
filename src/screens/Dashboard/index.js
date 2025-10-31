@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "@/hooks";
 import { capitalizeName } from '@/utils/functions.js'
-import GradientText from '@/utils/ui/Gradient.js'
 import { MarketPlace } from "./card";
 import Banner from "@/utils/ui/Banner";
 import Footer from "@/screens/navigator/userTab";
@@ -142,8 +141,8 @@ export default function Index() {
           navigation={navigation}
           activeRoute={route.name}
           menuItems={[
-            { label: "Bill", icon: "book-outline", screen: "Bill" },
-            { label: "Order", icon: "fast-food-outline", screen: "MyOrders" },
+            { label: "List", icon: "book-outline", screen: "TaskList" },
+            { label: "Form", icon: "settings-outline", screen: "TaskForm" },
             { label: "Setting", icon: "settings-outline", screen: "Settings" },
           ]}
         />

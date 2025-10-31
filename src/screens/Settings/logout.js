@@ -10,7 +10,7 @@ export default function CustomConfirmModal({
   onConfirm,
   onCancel,
   iconName = "alert-circle-outline",
-  yesBgColor = "#FC8019",
+  yesBgColor = "#800080",
   noBgColor = "#ccc",
   customIcon = null,
 }) {
