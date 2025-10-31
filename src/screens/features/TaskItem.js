@@ -12,6 +12,7 @@ const TaskItem = ({ item, onPress }) => (
     }}
   >
     <View>
+       <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.userName}</Text>
       <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.title}</Text>
       <Text style={{ color: '#555' }}>{item.description}</Text>
       {item.dueDate && (

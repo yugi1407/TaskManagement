@@ -10,6 +10,7 @@ const TaskList = () => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const { tasks, loading } = useSelector((state) => state.tasks);
+  console.log("tasks:",tasks)
   const user = auth().currentUser;
   const userId = user?.uid;
 

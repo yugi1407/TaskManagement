@@ -7,8 +7,9 @@ export const createTask = async (task) => {
         title: task.title,
         description: task.description || '',
         userId: task.userId,
+        userName: task.userName,
         completed: false,
-        dueDate: task.dueDate || null, 
+        dueDate: task.dueDate || null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
     };

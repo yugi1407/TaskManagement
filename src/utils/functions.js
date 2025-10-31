@@ -2,6 +2,15 @@ export const capitalizeName = (name) => {
   return name.replace(/\b\w/g, char => char.toUpperCase());
 };
 
+export const isUsername = (username) => {
+  if (!username) return "Username is required";
+  if (username.length < 4) return "Minimum 4 characters required";
+  if (username.length > 50) return "Maximum 50 characters allowed";
+  if (!/^[a-zA-Z0-9]*$/.test(username)) return "Username must be alphanumeric";
+  return "";
+};
+
+
 export const isEmail = (email) => {
   if (!email) return "Email is required";
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
