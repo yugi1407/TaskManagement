@@ -43,3 +43,25 @@ export const checkAndNotifyDueTasks = async (tasks = []) => {
         }
     }
 };
+
+export const notifyTaskCompleted = async (task) => {
+  if (!task || task.notified || !task.completed) return;
+
+  try {
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Notifications',
+      importance: AndroidImportance.HIGH,
+    });
+
+    await notifee.displayNotification({
+      title: '✅ Task Completed!',
+      body: `You’ve completed the task "${task.title}". Great job!`,
+      android: { channelId, importance: AndroidImportance.HIGH },
+    });
+
+    if (task.id) await updateTask(task.id, { notified: true });
+  } catch (error) {
+    console.warn('Notification error:', error);
+  }
+};

@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { auth } from "@/api/firebase";
+import { notifyTaskCompleted } from '@/utils/notification';
 import Header from "@/utils/ui/Header";
 import Input from "@/utils/ui/input";
 import DatePicker from "@/utils/ui/DatePicker";
@@ -73,8 +74,14 @@ const TaskDetail = () => {
     navigation.goBack();
   };
 
-  const handleToggleComplete = () => {
-    dispatch(editTask({ id: task.id, updates: { completed: !task.completed } }));
+  const handleToggleComplete = async () => {
+    const updatedTask = { ...task, completed: !task.completed };
+    dispatch(editTask({ id: task.id, updates: { completed: updatedTask.completed } }));
+
+    if (updatedTask.completed && !task.notified) {
+      await notifyTaskCompleted(updatedTask);
+    }
+
     navigation.goBack();
   };
 
