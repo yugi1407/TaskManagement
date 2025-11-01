@@ -1,4 +1,5 @@
-# SmartTask Manager (SDE II Assessment)
+# 🧠 SmartTask Manager (SDE II Assessment)
+
 A task management app built with **React Native**, featuring **Firebase Firestore integration**, **Redux Toolkit state management**, **Firebase Authentication**, and **local notifications**.  
 Developed by **Yugendran B** as part of the **SDE II Project Assessment**.
 
@@ -14,7 +15,7 @@ SmartTask Manager uses **Firebase Authentication** for secure login and user man
 - **Forgot Password:** Sends a password reset link to the registered email. *(Note: The reset email may appear in the **Spam** folder.)*
 - **Role-Based Access:**  
   - Admin access is determined by email:  
-    **Admin:** `yugendran1407@gmail.com` (Password: `1234567890`)
+    **Admin:** `yugendran1407@gmail.com` (Password: `1234567890`)  
   - Other users are regular users with limited privileges.
 
 ---
@@ -46,7 +47,7 @@ SmartTask Manager uses **Firebase Authentication** for secure login and user man
   - Implemented with **Notifee** to notify users when:
     - A task is **due** or **overdue**.
     - A task is **completed**, showing:  
-      `"✅ Task Completed! You’ve completed the task “<title>”. Great job!"`.
+      `"✅ Task Completed! You’ve completed the task “<title>”. Great job!"`
   - Notifications are **local** — each user only receives notifications for their own tasks.
 
 ---
@@ -88,7 +89,7 @@ SmartTask Manager uses **Firebase Authentication** for secure login and user man
 
 ## 🧰 State Management
 
-State handled via **Redux Toolkit**:
+Handled via **Redux Toolkit**:
 - Centralized store for tasks and users.
 - Async actions handle Firebase CRUD.
 - Local caching via **AsyncStorage**.
@@ -99,6 +100,18 @@ State handled via **Redux Toolkit**:
 *(Not yet implemented)*  
 Uses Firestore’s real-time updates for now.  
 Planned enhancement: **offline caching** and **sync on reconnect**.
+
+---
+
+## 📸 App Screenshots
+
+| | |
+|:--:|:--:|
+| ![Sign Up](./screenshots/SignUp.jpg) | ![Login](./screenshots/Login.jpg) |
+| ![Forgot Password](./screenshots/Forgot.jpg) | ![Dashboard](./screenshots/Dashboard.jpg) |
+| ![Add Task](./screenshots/AddTask.jpg) | ![Task List](./screenshots/TaskList.jpg) |
+| ![Task Details](./screenshots/TaskDetails.jpg) | ![User Filter](./screenshots/UserFilter.jpg) |
+| ![Logout](./screenshots/Logout.jpg) |  |
 
 ---
 
@@ -114,7 +127,8 @@ Planned enhancement: **offline caching** and **sync on reconnect**.
 # 1. Install dependencies
 npm install
 
-# 2. Run the app
+# 2. Run on Android
 npx react-native run-android
+
 # or for iOS
 npx react-native run-ios
