@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
+import { View, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
 import DatePicker from "@/utils/ui/DatePicker";
 import Header from "@/utils/ui/Header";
 import { useDispatch } from "react-redux";
@@ -88,7 +88,7 @@ const TaskForm = () => {
   };
 
   const LabelText = ({ text }) => (
-    <Text style={[Fonts.regular, Fonts.fw600, Gutters.lmicroBMargin, {color:Colors.text}]}>{text} </Text>
+    <Text style={[Fonts.small, Fonts.fw600, Gutters.lmicroBMargin, {color:Colors.text}]}>{text} </Text>
   );
 
   return (

@@ -14,8 +14,8 @@ export default function TaskItem({ item, onPress }) {
   const Avatar = ({ name }) => {
     const firstLetter = name ? name.charAt(0).toUpperCase() : "?";
     return (
-      <View style={[Layout.center, Gutters.largeBRadius, { width: 40, height: 40, backgroundColor: "#E1ECF9" }]}>
-        <Text style={[Fonts.bold, Fonts.textblue, { fontSize: FontSize.lsmall }]}>{firstLetter}</Text>
+      <View style={[Layout.center, Gutters.largeBRadius, { width: 40, height: 40, backgroundColor:'#fed7feff' }]}>
+        <Text style={[Fonts.bold, Fonts.textblue, { fontSize: FontSize.lsmall, color:Colors.primary }]}>{firstLetter}</Text>
       </View>
     );
   };
@@ -45,7 +45,7 @@ export default function TaskItem({ item, onPress }) {
 
         <View style={{ flex: 6 }}>
           <Text style={[Fonts.textblue, Fonts.tiny, Fonts.fw600]}>{item.userName || "-"}</Text>
-          <Text style={[Fonts.textnumber, Fonts.tiny]}>{item.title || "-"}</Text>
+          <Text style={[Fonts.textblue, Fonts.tiny, Fonts.fw300]}>{item.title || "-"}</Text>
         </View>
 
         <View style={[Layout.alignItemsCenter, Layout.justifyEnd, Layout.row, { flex: 3 }]}>

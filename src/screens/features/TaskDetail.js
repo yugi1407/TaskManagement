@@ -1,59 +1,71 @@
-import React, { useState, useMemo } from "react";
-import { View, Text, TouchableOpacity, TextInput } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { auth } from "@/api/firebase";
+import Header from "@/utils/ui/Header";
+import Input from "@/utils/ui/input";
+import DatePicker from "@/utils/ui/DatePicker";
+import { isAdmin } from "@/utils/constants/user";
+import GradientText from '@/utils/ui/Gradient.js'
+import LinearGradient from 'react-native-linear-gradient';
 import { editTask, removeTask } from "@/utils/store/taskSlice";
+import { useTheme } from "@/hooks";
+import {
+  isValidTitle,
+  isValidDescription,
+  isValidDueDate,
+} from "src/utils/functions";
 
 const TaskDetail = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
   const { params } = useRoute();
   const { task } = params;
-  const dispatch = useDispatch();
+  const { Fonts, Gutters, Colors, Layout } = useTheme();
+  const user = auth().currentUser;
+
+  const IsAdmin = isAdmin(user)
 
   const [form, setForm] = useState({
-    title: task.title,
+    title: task.title || "",
     description: task.description || "",
-    dueDate: task.dueDate ? new Date(task.dueDate) : null,
+    dueDate: task.dueDate ? new Date(task.dueDate) : new Date(),
   });
 
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const formattedDateTime = useMemo(() => {
-    if (!form.dueDate) return "Select Due Date & Time";
-    return form.dueDate.toLocaleString("en-IN", {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-  }, [form.dueDate]);
+  const handleChange = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
 
-  const onDateChange = (event, selectedDate) => {
-    setShowDatePicker(false);
-    if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      setForm((prev) => ({ ...prev, dueDate: newDate }));
-      setShowTimePicker(true); 
-    }
-  };
+    let errorMsg = "";
+    if (key === "title") errorMsg = isValidTitle(value);
+    if (key === "description") errorMsg = isValidDescription(value);
+    if (key === "dueDate") errorMsg = isValidDueDate(value);
 
-  const onTimeChange = (event, selectedTime) => {
-    setShowTimePicker(false);
-    if (selectedTime) {
-      const newDate = new Date(form.dueDate || new Date());
-      newDate.setHours(selectedTime.getHours());
-      newDate.setMinutes(selectedTime.getMinutes());
-      setForm((prev) => ({ ...prev, dueDate: newDate }));
-    }
+    setErrors((prev) => ({ ...prev, [key]: errorMsg }));
   };
 
   const handleUpdate = () => {
+    const titleError = isValidTitle(form.title);
+    const descError = isValidDescription(form.description);
+    const dateError = isValidDueDate(form.dueDate);
+
+    if (titleError || descError || dateError) {
+      setErrors({
+        title: titleError,
+        description: descError,
+        dueDate: dateError,
+      });
+      return;
+    }
+
     dispatch(
       editTask({
         id: task.id,
         updates: {
-          title: form.title,
-          description: form.description,
+          title: form.title.trim(),
+          description: form.description.trim(),
           dueDate: form.dueDate ? form.dueDate.toISOString() : null,
         },
       })
@@ -61,7 +73,7 @@ const TaskDetail = () => {
     navigation.goBack();
   };
 
-  const toggleCompletion = () => {
+  const handleToggleComplete = () => {
     dispatch(editTask({ id: task.id, updates: { completed: !task.completed } }));
     navigation.goBack();
   };
@@ -71,119 +83,88 @@ const TaskDetail = () => {
     navigation.goBack();
   };
 
+  const Label = ({ text }) => (
+    <Text style={[Fonts.small, Fonts.fw600, Gutters.lmicroBMargin, { color: Colors.text }]}>{text} </Text>
+  );
+
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 10 }}>
-        Task Details
-      </Text>
+    <View style={{ flex: 1, backgroundColor: Colors.bgcolor }}>
+      <Header headerName="Task Details" />
 
-      <Text style={{ fontSize: 16, color: "#555", marginBottom: 10 }}>
-        👤 Assigned to:{" "}
-        <Text style={{ fontWeight: "bold" }}>
-          {task.userName || "Unassigned"}
-        </Text>
-      </Text>
-
-      {/* Title */}
-      <TextInput
-        value={form.title}
-        onChangeText={(title) => setForm((p) => ({ ...p, title }))}
-        placeholder="Task Title"
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 10,
-          marginBottom: 10,
-        }}
-      />
-
-      {/* Description */}
-      <TextInput
-        value={form.description}
-        onChangeText={(description) => setForm((p) => ({ ...p, description }))}
-        placeholder="Task Description"
-        multiline
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 10,
-          marginBottom: 10,
-          height: 80,
-        }}
-      />
-
-      <TouchableOpacity
-        onPress={() => setShowDatePicker(true)}
-        style={{
-          borderWidth: 1,
-          borderColor: "#ccc",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 20,
-        }}
+      <ScrollView
+        style={[Gutters.defPadding, { marginBottom: 90 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Text style={{ color: form.dueDate ? "#000" : "#999" }}>
-          📅 {formattedDateTime}
-        </Text>
-      </TouchableOpacity>
 
-      {showDatePicker && (
-        <DateTimePicker
-          value={form.dueDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={onDateChange}
+        <GradientText text={task.userName || "Unassigned"} gradientDirection='diagonalTLBR' fontSize={20} gradientColors={[Colors.primary, '#FEC230']} svgHeight={40} fontFamily={Fonts.semibold.fontFamily} />
+
+        <Label text="Task Name" />
+        <Input
+          placeholder="Task Title"
+          value={form.title}
+          onChangeText={(title) => handleChange("title", title)}
+          showError={!!errors.title}
+          errorMessage={errors.title}
         />
-      )}
 
-      {showTimePicker && (
-        <DateTimePicker
-          value={form.dueDate || new Date()}
-          mode="time"
-          display="default"
-          onChange={onTimeChange}
+        <Label text="Description" />
+        <Input
+          placeholder="Task Description"
+          value={form.description}
+          onChangeText={(description) =>
+            handleChange("description", description)
+          }
+          multiline
+          height={70}
+          showError={!!errors.description}
+          errorMessage={errors.description}
         />
-      )}
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#4CAF50",
-          padding: 10,
-          borderRadius: 8,
-          marginBottom: 10,
-        }}
-        onPress={handleUpdate}
-      >
-        <Text style={{ color: "#fff", textAlign: "center" }}>Update Task</Text>
-      </TouchableOpacity>
+        <Label text="Due Date" />
+        <DatePicker
+          label="Select Date & Time"
+          value={form.dueDate}
+          onChange={(date) => handleChange("dueDate", date)}
+          error={errors.dueDate}
+        />
+        {IsAdmin &&
+          < View style={[Layout.row, Layout.fill, Gutters.defTMargin, Gutters.defTMargin, Layout.center, Gutters.regularBMargin]}>
+            <TouchableOpacity style={[Layout.fill, { marginRight: 8 }]} onPress={handleToggleComplete}>
+              <LinearGradient
+                colors={['#FFF9B4', '#C5AB4E']}
+                start={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[Gutters.microBRadius, Layout.center, Layout.fill, { padding: 2 }]}>
+                <Text style={[Fonts.ltiny, Fonts.center, Fonts.fw600, Layout.fill, Gutters.smallHPadding, Gutters.tinyVPadding, Gutters.microBRadius, { color: "#F3D26C", width: '100%', backgroundColor: Colors.primary }]}>{task.completed ? "Mark Incomplete" : "Mark Complete"}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#FEC230",
-          padding: 10,
-          borderRadius: 8,
-          marginBottom: 10,
-        }}
-        onPress={toggleCompletion}
-      >
-        <Text style={{ textAlign: "center" }}>
-          {task.completed ? "Mark Incomplete" : "Mark Complete"}
-        </Text>
-      </TouchableOpacity>
+            <TouchableOpacity style={[Layout.fill, { marginLeft: 8 }]} onPress={handleDelete}>
+              <LinearGradient
+                colors={['#FFE1A6', '#D3A851']}
+                start={{ x: 1, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[Gutters.microBRadius, Layout.center, Layout.fill, Gutters.tinyVPadding,]}>
+                <Text style={[Fonts.ltiny, Fonts.center, Fonts.fw600, Fonts.white]}>Delete Task</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        }
+      </ScrollView >
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: "#e74c3c",
-          padding: 10,
-          borderRadius: 8,
-        }}
-        onPress={handleDelete}
-      >
-        <Text style={{ color: "#fff", textAlign: "center" }}>Delete Task</Text>
-      </TouchableOpacity>
-    </View>
+      <View style={[Gutters.defPadding, { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: Colors.white }]}>
+        <TouchableOpacity style={[Gutters.tinyPadding, Gutters.microBRadius,
+        { backgroundColor: Colors.primary, width: "100%", }]}
+          onPress={IsAdmin ? handleUpdate : handleToggleComplete}
+        >
+          <Text
+            style={[Fonts.fw600, Fonts.center, { color: Colors.white }]}
+          >
+            {IsAdmin ? 'Update Task' : task.completed ? "Mark Incomplete" : "Mark Complete"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View >
   );
 };
 
