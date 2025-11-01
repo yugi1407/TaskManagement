@@ -1,12 +1,18 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { View, TextInput, TouchableOpacity, Text, FlatList } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView, Platform } from "react-native";
+import DatePicker from "@/utils/ui/DatePicker";
+import Header from "@/utils/ui/Header";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { firestore } from "@/api/firebase";
+import Input from "@/utils/ui/input";
+import SearchBar from "src/utils/ui/SearchBar";
+import { useTheme } from "@/hooks";
 import { addTask } from "@/utils/store/taskSlice";
+import { isValidTitle, isValidDescription, isValidUser, isValidDueDate } from "src/utils/functions";
 
 const TaskForm = () => {
+  const { Fonts, Gutters, Layout, Colors } = useTheme();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -20,6 +26,7 @@ const TaskForm = () => {
     search: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [users, setUsers] = useState([]);
 
   const dispatch = useDispatch();
@@ -42,35 +49,30 @@ const TaskForm = () => {
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+
+    let errorMsg = "";
+    if (key === "title") errorMsg = isValidTitle(value);
+    if (key === "description") errorMsg = isValidDescription(value);
+    if (key === "dueDate") errorMsg = isValidDueDate(value);
+    if (key === "selectedUser") errorMsg = isValidUser(value);
+
+    setErrors((prev) => ({ ...prev, [key]: errorMsg }));
   };
 
   const handleUiChange = (key, value) => {
     setUi((prev) => ({ ...prev, [key]: value }));
   };
 
-  const onDateChange = (event, selectedDate) => {
-    handleUiChange("showDatePicker", false);
-    if (selectedDate) {
-      handleChange("dueDate", new Date(selectedDate));
-      handleUiChange("showTimePicker", true);
-    }
-  };
-
-  const onTimeChange = (event, selectedTime) => {
-    handleUiChange("showTimePicker", false);
-    if (selectedTime) {
-      const newDate = new Date(form.dueDate || new Date());
-      newDate.setHours(selectedTime.getHours());
-      newDate.setMinutes(selectedTime.getMinutes());
-      handleChange("dueDate", newDate);
-    }
-  };
+  const isFormValid =
+    !isValidTitle(form.title) &&
+    !isValidDescription(form.description) &&
+    !isValidDueDate(form.dueDate) &&
+    !isValidUser(form.selectedUser);
 
   const submitHandler = () => {
+    if (!isFormValid) return;
+
     const { title, description, dueDate, selectedUser } = form;
-    if (!title.trim()) return alert("Enter task title");
-    if (!selectedUser) return alert("Select a user to assign");
-    if (!dueDate) return alert("Select a due date & time");
 
     const newTask = {
       title,
@@ -85,90 +87,80 @@ const TaskForm = () => {
     navigation.goBack();
   };
 
+  const LabelText = ({ text }) => (
+    <Text style={[Fonts.regular, Fonts.fw600, Gutters.lmicroBMargin, {color:Colors.text}]}>{text} </Text>
+  );
+
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <TextInput
-        placeholder="Task Title"
-        value={form.title}
-        onChangeText={(text) => handleChange("title", text)}
-        style={{ borderBottomWidth: 1, marginBottom: 16, padding: 8 }}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: Colors.bgcolor }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <Header headerName="Add Task" />
+      <View style={{ flex: 1, padding: 20 }}>
 
-      <TextInput
-        placeholder="Task Description"
-        value={form.description}
-        onChangeText={(text) => handleChange("description", text)}
-        multiline
-        style={{ borderBottomWidth: 1, marginBottom: 16, padding: 8 }}
-      />
+        <LabelText text="Assign To" />
 
-      <TextInput
-        placeholder="Search User"
-        value={ui.search}
-        onChangeText={(text) => handleUiChange("search", text)}
-        style={{ borderBottomWidth: 1, marginBottom: 8, padding: 8 }}
-      />
-
-      {filteredUsers.length > 0 && (
-        <FlatList
+        <SearchBar
           data={filteredUsers}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                padding: 8,
-                backgroundColor:
-                  form.selectedUser?.id === item.id ? "#FEC230" : "#eee",
-                borderRadius: 6,
-                marginBottom: 4,
-              }}
-              onPress={() => handleChange("selectedUser", item)}
-            >
-              <Text>{item.username}</Text>
-            </TouchableOpacity>
-          )}
+          value={ui.search}
+          onChangeText={(text) => {
+            handleUiChange("search", text);
+            handleChange("selectedUser", null);
+          }}
+          onSelectItem={(item) => {
+            handleChange("selectedUser", item);
+            handleUiChange("search", item.username);
+          }}
+          selectedItem={form.selectedUser}
+          displayKey="username"
+          placeholder="Search Users..."
+          errorMessage={errors.selectedUser}
         />
-      )}
 
-      <TouchableOpacity
-        onPress={() => handleUiChange("showDatePicker", true)}
-        style={{ marginVertical: 16 }}
-      >
-        <Text>
-          {form.dueDate
-            ? `📅 ${form.dueDate.toLocaleDateString()} 🕒 ${form.dueDate.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}`
-            : "Select Due Date & Time"}
-        </Text>
-      </TouchableOpacity>
+        <LabelText text="Task Name" />
 
-      {ui.showDatePicker && (
-        <DateTimePicker
-          value={form.dueDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={onDateChange}
+        <Input
+          placeholder="Task Title"
+          value={form.title}
+          onChangeText={(text) => handleChange("title", text)}
+          showError={!!errors.title}
+          errorMessage={errors.title}
         />
-      )}
 
-      {ui.showTimePicker && (
-        <DateTimePicker
-          value={form.dueDate || new Date()}
-          mode="time"
-          display="default"
-          onChange={onTimeChange}
+        <LabelText text="Description" />
+
+        <Input
+          placeholder="Task Description"
+          value={form.description}
+          onChangeText={(text) => handleChange("description", text)}
+          multiline={true}
+          height={70}
+          showError={!!errors.description}
+          errorMessage={errors.description}
         />
-      )}
 
-      <TouchableOpacity
-        onPress={submitHandler}
-        style={{ backgroundColor: "#FEC230", padding: 12, borderRadius: 8 }}
-      >
-        <Text style={{ textAlign: "center", fontWeight: "bold" }}>Save Task</Text>
-      </TouchableOpacity>
-    </View>
+        <LabelText text="Date & Time" />
+
+        <DatePicker
+          value={form.dueDate}
+          onChange={(date) => handleChange("dueDate", date)}
+          error={errors.dueDate}
+          label="Select Due Date & Time"
+        />
+
+      </View>
+
+      <View style={[Gutters.defPadding]}>
+        <TouchableOpacity style={[Gutters.tinyPadding, Gutters.microBRadius, { backgroundColor: isFormValid ? Colors.primary : "#f5c3f5ff", width: "100%" }]}
+          onPress={submitHandler} disabled={!isFormValid}
+        >
+          <Text style={[Fonts.fw600, Fonts.center, { color: Colors.white }]}>
+            Create Task
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

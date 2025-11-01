@@ -3,46 +3,52 @@ import { firestore, auth } from './firebase';
 const tasksCollection = firestore().collection('tasks');
 
 export const createTask = async (task) => {
-  const newTask = {
-    title: task.title,
-    description: task.description || '',
-    userId: task.userId,
-    userName: task.userName,
-    completed: false,
-    notified: false, 
-    dueDate: task.dueDate || null,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+    const newTask = {
+        title: task.title,
+        description: task.description || '',
+        userId: task.userId,
+        userName: task.userName,
+        completed: false,
+        notified: false,
+        dueDate: task.dueDate || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
 
-  const docRef = await tasksCollection.add(newTask);
-  await docRef.update({ id: docRef.id });
+    const docRef = await tasksCollection.add(newTask);
+    await docRef.update({ id: docRef.id });
 
-  return { id: docRef.id, ...newTask };
+    return { id: docRef.id, ...newTask };
 };
 
 
 export const listenToTasks = (userId, callback) => {
-    return tasksCollection
-        .where('userId', '==', userId)
-        .orderBy('createdAt', 'desc')
-        .onSnapshot(
-            (snapshot) => {
-                if (!snapshot || !snapshot.docs) {
-                    console.warn('⚠️ Firestore snapshot is null — skipping');
-                    return;
-                }
-                const tasks = snapshot.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
-                callback(tasks);
-            },
-            (error) => {
-                console.error('🔥 Firestore listen error:', error);
+    let query = tasksCollection.orderBy('createdAt', 'desc');
+
+    if (userId !== 'all') {
+        query = query.where('userId', '==', userId);
+    }
+
+    return query.onSnapshot(
+        (snapshot) => {
+            if (!snapshot || !snapshot.docs) {
+                console.warn('⚠️ Firestore snapshot is null — skipping');
+                return;
             }
-        );
+
+            const tasks = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            callback(tasks);
+        },
+        (error) => {
+            console.error('🔥 Firestore listen error:', error);
+        }
+    );
 };
+
 
 export const getUsername = async () => {
     try {

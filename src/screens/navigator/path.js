@@ -11,6 +11,7 @@ import Dashboard from "@/screens/Dashboard";
 import TaskList from 'src/screens/features/TaskList';
 import TaskDetail from 'src/screens/features/TaskDetail';
 import TaskForm from 'src/screens/features/TaskForm';
+import FilterDetails from "src/utils/filterDetails";
 import Settings from "@/screens/Settings";
 
 const Stack = createStackNavigator();
@@ -74,6 +75,7 @@ export default function Path() {
         <Stack.Screen name="TaskList" component={TaskList} />
         <Stack.Screen name="TaskDetail" component={TaskDetail} />
         <Stack.Screen name="TaskForm" component={TaskForm} />
+        <Stack.Screen name="FilterDetails" component={FilterDetails} />
         <Stack.Screen name="Settings" component={Settings} />
       </Stack.Navigator>
     </NavigationContainer>

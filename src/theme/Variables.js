@@ -20,6 +20,7 @@ export const Colors = {
   primary: '#800080',
   altprimary: '#13379B',
   secondary: '#FF8AFF',
+  bgcolor: '#fdf2fdff',
   primLight: '#F2EFFF',
   primLightDarker: '#DBE1FB',
   primMod: "#12369B",

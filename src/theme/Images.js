@@ -9,6 +9,7 @@ export default function ({ }) {
       easyHand: require('./assets/images/easy-hand.png'),
       bulk: require('./assets/images/bulk.png'),
       bag: require('./assets/images/bag.png'),
+      empty: require('./assets/images/empty.png'),
     }
   };
 };

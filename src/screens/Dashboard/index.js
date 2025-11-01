@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, ScrollView, Image, Dimensions, ToastAndroid, BackHandler, TouchableOpacity } from "react-native";
-import { requestNotificationPermission, checkAndNotifyDueTasks } from '@/utils/notification';
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { useTaskNotificationChecker } from './notify';
 import { useSelector } from 'react-redux';
@@ -15,7 +14,6 @@ export default function Index() {
   const { Colors, Fonts, Gutters, Layout, Images, FontSize } = useTheme();
   const { width, height } = Dimensions.get('window');
   const { tasks } = useSelector((state) => state.tasks);
-  console.log("tasks:", tasks)
   const navigation = useNavigation();
   const route = useRoute();
   const [username, setUsername] = React.useState('');

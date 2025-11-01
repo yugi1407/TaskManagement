@@ -2,6 +2,47 @@ export const capitalizeName = (name) => {
   return name.replace(/\b\w/g, char => char.toUpperCase());
 };
 
+export const formatDateTime = (date, label = "Select Date") => {
+  if (!date) return label;
+
+  const day = date.toLocaleDateString("en-US", { day: "2-digit" });
+  const month = date.toLocaleDateString("en-US", { month: "short" });
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" }); 
+  const time = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+
+  return `${day} ${month}, ${weekday} at ${time}`;
+};
+
+export const isValidDueDate = (date) => {
+  console.log("date:", date)
+  if (!date) return "Please select a due date and time";
+  return "";
+};
+
+export const isValidUser = (user) => {
+  if (!user) return "Please select a user to assign";
+  return "";
+};
+
+export const isValidDescription = (desc) => {
+  if (!desc) return "Task description is required";
+  if (desc.trim().length < 5) return "Minimum 5 characters required";
+  return "";
+};
+
+export const isValidTitle = (title) => {
+  if (!title) return "Task title is required";
+  if (title.trim().length < 3) return "Minimum 3 characters required";
+  if (title.trim().length > 100) return "Maximum 100 characters allowed";
+  if (!/^[a-zA-Z0-9\s.,'-]*$/.test(title))
+    return "Title can only contain letters, numbers, spaces, and basic punctuation";
+  return "";
+};
+
 export const isUsername = (username) => {
   if (!username) return "Username is required";
   if (username.length < 4) return "Minimum 4 characters required";
@@ -60,6 +101,7 @@ export const getFirebaseErrorMessage = (code) => {
 
 
 export const getLoginErrorMessage = (errorCode) => {
+  console.log(errorCode)
   switch (errorCode) {
     case "auth/user-not-found":
       return "No user found with this email.";
@@ -71,6 +113,8 @@ export const getLoginErrorMessage = (errorCode) => {
       return "Email field cannot be empty.";
     case "auth/network-request-failed":
       return "Network error. Please check your connection.";
+    case "auth/invalid-credential":
+      return "Invalid email or password"
     default:
       return "Login failed. Please try again later.";
   }

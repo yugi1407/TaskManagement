@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, ImageBackground, ActivityIndicator } from "react-native";
 import Input from "@/utils/ui/input";
 import { isEmail, isPassword, getLoginErrorMessage } from "src/utils/functions";
 import { useNavigation } from "@react-navigation/native";
@@ -14,6 +14,7 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: "", password: "" });
 
   const handleChangeEmail = (value) => {
@@ -36,10 +37,12 @@ export default function Login() {
     }
 
     try {
+      setLoading(true);
       const { user } = await auth().signInWithEmailAndPassword(email, password);
 
       if (!user.emailVerified) {
         showToast("Please verify your email before logging in.");
+        setLoading(false);
         return;
       }
 
@@ -50,6 +53,7 @@ export default function Login() {
       showToast("Login successful!");
       navigation.navigate("Dashboard");
     } catch (error) {
+      setLoading(false);
       console.log("Firebase Login Error:", error);
       showToast(getLoginErrorMessage(error.code));
     }
@@ -67,7 +71,7 @@ export default function Login() {
           contentContainerStyle={[Gutters.defHPadding, { flexGrow: 1 }]}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={[Layout.justifyContentCenter, { flex: 1}]}>
+          <View style={[Layout.justifyContentCenter, { flex: 1 }]}>
             <Text style={[Fonts.semibold, { color: Colors.text, fontSize: 20 }]}>Welcome back,</Text>
             <Text style={[Fonts.fw600, Gutters.defBMargin, { color: Colors.text }]}>Login to continue your journey!</Text>
 
@@ -88,11 +92,18 @@ export default function Login() {
               secureTextEntry
             />
 
-            <TouchableOpacity style={[Gutters.tinyPadding, Gutters.microBRadius, { backgroundColor: disabled ? "#f5c3f5ff" : Colors.primary, width: "100%" }]}
-              onPress={handleLogin} disabled={disabled}
-            >
-              <Text style={[Fonts.fw600, Fonts.center, { color: Colors.white }]}>Login</Text>
-            </TouchableOpacity>
+            {loading ? (
+              <View style={[Layout.rowCenter]}>
+                <ActivityIndicator style={[{ backgroundColor: Colors.secondary, width: 40, height: 40, borderRadius: 100 }]} size="large" color={Colors.white} />
+              </View>
+            ) : (
+
+              <TouchableOpacity style={[Gutters.tinyPadding, Gutters.microBRadius, { backgroundColor: disabled ? "#f5c3f5ff" : Colors.primary, width: "100%" }]}
+                onPress={handleLogin} disabled={disabled}
+              >
+                <Text style={[Fonts.fw600, Fonts.center, { color: Colors.white }]}>Login</Text>
+              </TouchableOpacity>
+            )}
 
             <View style={[Gutters.smallTMargin, Layout.row, Layout.justifyEnd]}>
               <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
@@ -104,7 +115,7 @@ export default function Login() {
 
             <View style={[Gutters.regularTMargin]}>
               <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-                <Text style={[Fonts.center,  Fonts.fw500, { color: Colors.text }]}>
+                <Text style={[Fonts.center, Fonts.fw500, { color: Colors.text }]}>
                   New user ? <Text style={[Fonts.semibold, { color: Colors.primary }]}>Sign Up</Text>
                 </Text>
               </TouchableOpacity>
