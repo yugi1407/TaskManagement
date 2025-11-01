@@ -3,10 +3,11 @@ import { View, Text, ScrollView, Image, Dimensions, ToastAndroid, BackHandler, T
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { useTaskNotificationChecker } from './notify';
 import { useSelector } from 'react-redux';
+import LinearGradient from 'react-native-linear-gradient';
 import { useTheme } from "@/hooks";
 import { getUsername } from '@/api/tasksApi';
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { capitalizeName } from '@/utils/functions.js'
-import { MarketPlace } from "./card";
 import Banner from "@/utils/ui/Banner";
 import Footer from "@/screens/navigator/userTab";
 
@@ -17,12 +18,6 @@ export default function Index() {
   const navigation = useNavigation();
   const route = useRoute();
   const [username, setUsername] = React.useState('');
-
-  const marketPlace = [
-    { img: Images.screens.easyHand, title: '10 points', subtitle: 'for every\n₹200 spent\nonline', textColor: Colors.white },
-    { img: Images.screens.bulk, title: '5 points', subtitle: 'Fuel\nsurcharge\nwaiver', textColor: Colors.white },
-    { img: Images.screens.bag, title: '2X points', subtitle: 'on travel &\nhotel\nbookings', textColor: Colors.white },
-  ];
 
   useTaskNotificationChecker(tasks);
 
@@ -90,53 +85,42 @@ export default function Index() {
 
       <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-start' }}>
 
-        <View style={[Layout.fill, Gutters.defTMargin, Gutters.defBMargin]}>
+        <LinearGradient
+          colors={[Colors.secondary, Colors.white]}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[]}>
+          <View style={[Layout.alignItemsCenter]}>
+            <Image
+              source={Images.screens.dashboard}
+              style={{ width: width * 1, height: height * 0.45, resizeMode: "contain" }}
+            />
+          </View>
+
+        </LinearGradient>
+
+
+        <Text style={[Fonts.lregular, Gutters.regularTMargin, Fonts.center, Fonts.semibold, Gutters.lmicroBMargin, { color: Colors.text }]}>Welcome to Irish Task</Text>
+        <Text style={[Fonts.tiny, Fonts.center, Fonts.semibold, Gutters.lmicroBMargin, { color: Colors.grey }]}>Stay on top of your tasks every single day.{'\n'}With Irish Task.</Text>
+
+        <View style={[Layout.fill, Gutters.regularTMargin, Gutters.defBMargin]}>
           <Banner
             title={"Stay on track"}
             sub={"make every task count"}
             conclude={"Tap to read more."}
-            onPress={() => navigation.navigate("MyOrders")}
+            onPress={() => navigation.navigate("TaskForm")}
           />
         </View>
 
-        <View style={[Layout.justifyContentCenter, Gutters.defTPadding]}>
-          <View style={[Layout.rowCenter, Gutters.mmicroBMargin, { paddingHorizontal: 80 }]}>
-            <Image
-              source={Images.screens.startstar}
-              style={{ width: 40, height: 15, resizeMode: 'contain' }}
-            />
-            <Text style={[Fonts.fw600, Gutters.tinyHMargin, { color: Colors.text, letterSpacing: 1, fontSize: 15 }]}>
-              OUR PRODUCTS
-            </Text>
+        <View style={[Gutters.regularBPadding, Gutters.defHPadding, Gutters.defTPadding, { backgroundColor: "#F8FCFF" }]}>
+          <Text style={[Fonts.semibold, Fonts.textblue, { lineHeight: 40, color: "#1F207233", fontSize: 30 }]}>
+             smart,{"\n"}task management
+          </Text>
 
-            <Image
-              source={Images.screens.endstar}
-              style={{ width: 40, height: 15, resizeMode: 'contain' }}
-            />
-          </View>
-        </View>
-
-        <View style={[Layout.row, Gutters.smallVPadding]}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[Gutters.smallLPadding]}
-          >
-            {marketPlace.map((item) => (
-              <MarketPlace {...item} width={width} />
-            ))}
-          </ScrollView>
-        </View>
-
-        <Text allowFontScaling={false} style={[Fonts.center, Fonts.primary, Fonts.regular, Fonts.fw300, Gutters.defTMargin, { letterSpacing: 0.5 }]}>
-          Plan smart, work hard, <Text style={[Fonts.semibold, { fontSize: FontSize.regular }]}>ACHIEVE</Text>{'\n'}  more!
-        </Text>
-
-        <View style={[Layout.alignItemsCenter]}>
-          <Image
-            source={Images.screens.bigpizza}
-            style={{ width: width * 1.9, height: height * 0.55, resizeMode: "contain" }}
-          />
+          <Text style={[Fonts.tiny, Fonts.semibold, { lineHeight: 35, color: "#1F207233" }]}>
+            Made with <Ionicons name="heart" size={12} color="#E10E5A" /> by
+            the IrishTask
+          </Text>
         </View>
       </ScrollView>
 
@@ -147,7 +131,7 @@ export default function Index() {
           activeRoute={route.name}
           menuItems={[
             { label: "List", icon: "book-outline", screen: "TaskList" },
-            { label: "Form", icon: "settings-outline", screen: "TaskForm" },
+            { label: "Form", icon: "create-outline", screen: "TaskForm" },
             { label: "Setting", icon: "settings-outline", screen: "Settings" },
           ]}
         />

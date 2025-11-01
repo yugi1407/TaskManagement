@@ -12,23 +12,23 @@ export default function Banner({ title, sub, conclude, onPress }) {
         <View style={[{ backgroundColor: Colors.white }]}>
             <TouchableOpacity onPress={onPress}>
                 <LinearGradient
-                    colors={['#800080', '#FFFFFF']}
+                    colors={['#fec8e1ff', '#FFFFFF']}
                     start={{ x: 0, y: 1 }}
                     end={{ x: 1, y: 0 }}
                     style={[Gutters.smallBRadius, Layout.center, Gutters.smallHPadding, Gutters.defHMargin, Gutters.tinyVPadding, { backgroundColor: "#F3EFEE" }]}
                 >
                     <View style={[Layout.rowCenter]}>
                         <View style={{ flex: 5, justifyContent: "center" }}>
-                            <Text style={[Fonts.lsmall, Fonts.semibold, { color: Colors.white}]}>
+                            <Text style={[Fonts.lsmall, Fonts.semibold, { color: Colors.text}]}>
                                 {title}
                             </Text>
 
-                            <Text  style={[Fonts.fw600, Fonts.tiny, { color: Colors.white }]}>
+                            <Text  style={[Fonts.fw600, Fonts.tiny, { color: Colors.text }]}>
                                 {sub}
                             </Text>
 
                             <View style={[Layout.row]}>
-                                <Text  style={[Fonts.fw600, Fonts.tiny, Gutters.microBMargin, Gutters.microRMargin, { color: Colors.white }]}>
+                                <Text  style={[Fonts.fw600, Fonts.tiny, Gutters.microBMargin, Gutters.microRMargin, { color: Colors.text }]}>
                                     {conclude}
                                 </Text>
                                 <Ionicons name="arrow-forward-circle" size={18} color={Colors.primary} />
